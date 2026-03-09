@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PawVerse – Your Pet's World</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffbf5;
+    --terracotta: #c8603a;
+    --terracotta-light: #e07a52;
+    --sage: #6b8f6b;
+    --sage-light: #8aaf8a;
+    --amber: #d4952a;
+    --amber-light: #f0b84a;
+    --blush: #e8c4b0;
+    --deep: #2c1f14;
+    --mid: #5a3e2b;
+    --soft: #9a7b6a;
+    --card-bg: rgba(255,251,245,0.92);
+    --radius: 20px;
+    --radius-lg: 32px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(253,246,238,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(200,96,58,0.12);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: var(--terracotta);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-logo span { color: var(--deep); }
+  .nav-logo .paw-icon { font-size: 1.4rem; }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--mid);
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--terracotta); }
+
+  .nav-cta {
+    background: var(--terracotta);
+    color: white !important;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-weight: 600 !important;
+    transition: background 0.2s, transform 0.15s !important;
+  }
+  .nav-cta:hover { background: var(--terracotta-light) !important; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .blob1 { width: 600px; height: 600px; background: var(--terracotta); top: -100px; right: -100px; animation: drift 8s ease-in-out infinite alternate; }
+  .blob2 { width: 400px; height: 400px; background: var(--amber); bottom: -80px; left: 200px; animation: drift 10s ease-in-out infinite alternate-reverse; }
+  .blob3 { width: 300px; height: 300px; background: var(--sage); top: 200px; left: -80px; animation: drift 12s ease-in-out infinite alternate; }
+
+  @keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to { transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  .hero-text { position: relative; z-index: 2; }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(200,96,58,0.1);
+    border: 1px solid rgba(200,96,58,0.25);
+    color: var(--terracotta);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 5rem);
+    line-height: 1.08;
+    font-weight: 900;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-title .accent { color: var(--terracotta); font-style: italic; }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--soft);
+    max-width: 500px;
+    margin-bottom: 40px;
+    font-weight: 300;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--terracotta-light); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(200,96,58,0.35); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--deep);
+    border: 2px solid rgba(44,31,20,0.2);
+    padding: 14px 30px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--terracotta); color: var(--terracotta); transform: translateY(-2px); }
+
+  .hero-visual {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .hero-card-stack {
+    position: relative;
+    width: 380px;
+    height: 480px;
+  }
+
+  .hcard {
+    position: absolute;
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(44,31,20,0.12);
+    border: 1px solid rgba(200,96,58,0.1);
+  }
+
+  .hcard-main {
+    width: 280px;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .hcard-side {
+    width: 220px;
+    top: 0; right: 0;
+    z-index: 2;
+    transform: rotate(6deg);
+    animation: float 5s 1s ease-in-out infinite;
+  }
+
+  .hcard-back {
+    width: 200px;
+    top: 40px; left: 0;
+    z-index: 1;
+    transform: rotate(-8deg);
+    background: rgba(107,143,107,0.15);
+    animation: float 6s 0.5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+  }
+  .hcard-side { animation-name: floatSide; }
+  @keyframes floatSide {
+    0%, 100% { transform: rotate(6deg) translateY(0); }
+    50% { transform: rotate(6deg) translateY(-8px); }
+  }
+  .hcard-back { animation-name: floatBack; }
+  @keyframes floatBack {
+    0%, 100% { transform: rotate(-8deg) translateY(0); }
+    50% { transform: rotate(-8deg) translateY(-6px); }
+  }
+
+  .pet-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+  .pa-dog { background: rgba(212,149,42,0.15); }
+  .pa-cat { background: rgba(200,96,58,0.12); }
+  .pa-bird { background: rgba(107,143,107,0.15); }
+
+  .pet-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--deep); }
+  .pet-handle { font-size: 0.75rem; color: var(--soft); margin-bottom: 10px; }
+  .pet-post-text { font-size: 0.82rem; color: var(--mid); line-height: 1.5; margin-bottom: 12px; }
+
+  .post-actions {
+    display: flex;
+    gap: 14px;
+  }
+  .pa-btn {
+    font-size: 0.75rem;
+    color: var(--soft);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .pa-btn:hover { color: var(--terracotta); }
+
+  .stats-row {
+    display: flex; gap: 16px; margin-top: 12px;
+  }
+  .stat { text-align: center; }
+  .stat-n { font-weight: 700; font-size: 1.1rem; color: var(--terracotta); }
+  .stat-l { font-size: 0.7rem; color: var(--soft); }
+
+  /* ── AD BANNER (simulated) ── */
+  .ad-strip {
+    background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%);
+    color: white;
+    text-align: center;
+    padding: 14px 24px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+  }
+  .ad-strip::before {
+    content: '📢 AD';
+    font-size: 0.7rem;
+    background: var(--amber);
+    color: var(--deep);
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 12px;
+    letter-spacing: 0.5px;
+  }
+  .ad-strip a { color: var(--amber-light); text-decoration: underline; cursor: pointer; }
+
+  /* ── SECTION HEADER ── */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--terracotta);
+    margin-bottom: 16px;
+  }
+  .section-label::before, .section-label::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: var(--terracotta);
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 1rem;
+    color: var(--soft);
+    line-height: 1.7;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  /* ── SERVICES SECTION ── */
+  .services {
+    padding: 100px 48px;
+    position: relative;
+  }
+
+  .services-header {
+    text-align: center;
+    margin-bottom: 72px;
+  }
+  .services-header .section-sub { margin: 0 auto; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .service-card {
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+  .service-card:hover { transform: translateY(-6px); box-shadow: 0 32px 80px rgba(44,31,20,0.18); }
+
+  .sc-social {
+    background: linear-gradient(145deg, #fff5ee 0%, #ffe8d6 100%);
+    border: 1.5px solid rgba(200,96,58,0.2);
+  }
+  .sc-vet {
+    background: linear-gradient(145deg, #f0f7f0 0%, #ddeedd 100%);
+    border: 1.5px solid rgba(107,143,107,0.25);
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .sc-social::before { background: var(--terracotta); }
+  .sc-vet::before { background: var(--sage); }
+
+  .sc-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .sc-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+  }
+  .sc-social .sc-badge { background: rgba(200,96,58,0.12); color: var(--terracotta); }
+  .sc-vet .sc-badge { background: rgba(107,143,107,0.15); color: var(--sage); }
+
+  .sc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+  .sc-desc {
+    font-size: 0.95rem;
+    color: var(--soft);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .sc-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .sc-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--mid);
+    font-weight: 500;
+  }
+  .sc-features li::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .sc-social .sc-features li::before { background: var(--terracotta); }
+  .sc-vet .sc-features li::before { background: var(--sage); }
+
+  .sc-revenue {
+    background: rgba(44,31,20,0.05);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .sc-revenue strong { color: var(--deep); font-weight: 600; }
+
+  .btn-sc {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.25s;
+    text-decoration: none;
+  }
+  .sc-social .btn-sc { background: var(--terracotta); color: white; }
+  .sc-social .btn-sc:hover { background: var(--terracotta-light); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(200,96,58,0.3); }
+  .sc-vet .btn-sc { background: var(--sage); color: white; }
+  .sc-vet .btn-sc:hover { background: var(--sage-light); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(107,143,107,0.3); }
+
+  /* ── SOCIAL PAGE MOCKUP ── */
+  .social-page {
+    padding: 100px 48px;
+    background: var(--warm-white);
+    position: relative;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .mockup-frame {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(44,31,20,0.14);
+    border: 1px solid rgba(200,96,58,0.08);
+  }
+
+  .mockup-topbar {
+    background: var(--cream);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(44,31,20,0.06);
+  }
+  .mtb-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .d1 { background: #ff6060; } .d2 { background: #ffbd2e; } .d3 { background: #27c93f; }
+  .mtb-url {
+    flex: 1;
+    background: rgba(44,31,20,0.06);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.72rem;
+    color: var(--soft);
+    font-family: monospace;
+  }
+
+  .mockup-body { padding: 0; }
+
+  .app-nav-bar {
+    background: white;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0e8e0;
+    position: sticky;
+    top: 0;
+  }
+  .app-logo-sm {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--terracotta);
+  }
+  .app-nav-icons { display: flex; gap: 14px; font-size: 1.1rem; cursor: pointer; }
+
+  /* Social Feed */
+  .feed { max-height: 480px; overflow-y: auto; }
+  .feed::-webkit-scrollbar { width: 4px; }
+  .feed::-webkit-scrollbar-thumb { background: var(--blush); border-radius: 4px; }
+
+  /* Inline Ad in Feed */
+  .feed-ad {
+    margin: 12px 16px;
+    background: linear-gradient(135deg, #fff8f0, #ffe8d6);
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px dashed rgba(200,96,58,0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--mid);
+  }
+  .feed-ad-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--amber);
+    background: rgba(212,149,42,0.12);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .feed-ad-img { font-size: 1.8rem; }
+  .feed-ad-text strong { display: block; font-weight: 600; color: var(--deep); font-size: 0.82rem; }
+  .feed-ad-cta {
+    margin-left: auto;
+    background: var(--terracotta);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* Post card */
+  .post-card {
+    padding: 16px;
+    border-bottom: 1px solid #f5ece4;
+  }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .post-avatar { width: 38px; height: 38px; border-radius: 50%; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
+  .post-meta { flex: 1; }
+  .post-username { font-weight: 600; font-size: 0.85rem; color: var(--deep); }
+  .post-time { font-size: 0.7rem; color: var(--soft); }
+  .post-follow { font-size: 0.72rem; font-weight: 600; color: var(--terracotta); cursor: pointer; }
+
+  .post-content { font-size: 0.83rem; color: var(--mid); line-height: 1.6; margin-bottom: 12px; }
+  .post-image {
+    width: 100%;
+    height: 150px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+  .pi1 { background: linear-gradient(135deg, #ffe5c8, #ffd0a8); }
+  .pi2 { background: linear-gradient(135deg, #d4ecd4, #b8d8b8); }
+  .pi3 { background: linear-gradient(135deg, #d4e4f4, #b8ccdc); }
+
+  .post-footer {
+    display: flex;
+    gap: 16px;
+  }
+  .pf-action {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--soft);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .pf-action:hover { color: var(--terracotta); }
+
+  /* Promoted post */
+  .promoted-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--amber);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(212,149,42,0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+
+  /* Stories bar */
+  .stories-bar {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f5ece4;
+    overflow-x: auto;
+  }
+  .story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .story-ring {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid var(--terracotta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    padding: 2px;
+    background: white;
+  }
+  .story-label { font-size: 0.65rem; color: var(--mid); font-weight: 500; }
+
+  /* ── VET PAGE MOCKUP ── */
+  .vet-page {
+    padding: 100px 48px;
+    background: var(--cream);
+  }
+
+  .vet-mockup .app-nav-bar { border-bottom: 1px solid #e0eee0; }
+  .vet-app-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.1rem; color: var(--sage); }
+
+  .vet-feed { max-height: 480px; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .vet-feed::-webkit-scrollbar { width: 4px; }
+  .vet-feed::-webkit-scrollbar-thumb { background: rgba(107,143,107,0.3); border-radius: 4px; }
+
+  .doctor-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e8f0e8;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: box-shadow 0.2s;
+  }
+  .doctor-card:hover { box-shadow: 0 8px 24px rgba(107,143,107,0.12); }
+
+  .doc-avatar { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+  .da1 { background: #e8f4e8; } .da2 { background: #fef0e8; } .da3 { background: #e8eef8; }
+
+  .doc-info { flex: 1; }
+  .doc-name { font-weight: 700; font-size: 0.88rem; color: var(--deep); margin-bottom: 2px; }
+  .doc-spec { font-size: 0.73rem; color: var(--sage); font-weight: 600; margin-bottom: 4px; }
+  .doc-rating { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--soft); }
+  .doc-stars { color: var(--amber); }
+  .doc-fee { font-size: 0.78rem; font-weight: 700; color: var(--deep); margin-top: 4px; }
+  .doc-fee span { color: var(--soft); font-weight: 400; }
+  .doc-commission { font-size: 0.65rem; color: var(--sage); background: rgba(107,143,107,0.08); padding: 2px 7px; border-radius: 4px; display: inline-block; margin-top: 3px; }
+
+  .doc-btn {
+    background: var(--sage);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    align-self: center;
+    transition: background 0.2s;
+  }
+  .doc-btn:hover { background: var(--sage-light); }
+
+  /* Medicine card */
+  .med-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--deep);
+    margin: 4px 0 10px;
+  }
+
+  .med-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .med-card {
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid #e8f0e8;
+  }
+  .med-icon { font-size: 1.6rem; margin-bottom: 6px; }
+  .med-name { font-weight: 600; font-size: 0.78rem; color: var(--deep); margin-bottom: 2px; }
+  .med-price { font-size: 0.8rem; font-weight: 700; color: var(--sage); }
+  .med-commission-tag { font-size: 0.62rem; color: var(--terracotta); background: rgba(200,96,58,0.08); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+  .med-add {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    background: rgba(107,143,107,0.1);
+    color: var(--sage);
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .med-add:hover { background: rgba(107,143,107,0.2); }
+
+  /* Vet ad */
+  .vet-ad {
+    background: linear-gradient(135deg, #e8f4e8, #d4ecd4);
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px dashed rgba(107,143,107,0.35);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--mid);
+  }
+  .vet-ad-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--sage);
+    background: rgba(107,143,107,0.15);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* ── REVENUE MODEL ── */
+  .revenue {
+    padding: 100px 48px;
+    background: var(--deep);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .revenue::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(200,96,58,0.2) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(107,143,107,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .revenue-header {
+    text-align: center;
+    margin-bottom: 72px;
+    position: relative;
+    z-index: 2;
+  }
+  .revenue-header .section-label { color: var(--amber-light); }
+  .revenue-header .section-label::before, .revenue-header .section-label::after { background: var(--amber-light); }
+  .revenue-header .section-title { color: white; }
+  .revenue-header .section-sub { color: rgba(255,255,255,0.55); margin: 0 auto; }
+
+  .revenue-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .rev-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 32px 28px;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .rev-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+
+  .rev-icon { font-size: 2.4rem; margin-bottom: 16px; }
+  .rev-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; color: white; }
+  .rev-desc { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.7; font-weight: 300; margin-bottom: 20px; }
+  .rev-estimate {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .rev-$ { font-size: 0.8rem; color: var(--amber-light); font-weight: 600; }
+  .rev-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: white; }
+  .rev-period { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+
+  /* ── COMMUNITY STATS ── */
+  .stats-section {
+    padding: 80px 48px;
+    background: var(--warm-white);
+  }
+
+  .stats-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    text-align: center;
+  }
+
+  .stat-box {}
+  .stat-box-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--terracotta);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-box-label { font-size: 0.9rem; color: var(--soft); font-weight: 400; }
+  .stat-accent { font-family: 'Caveat', cursive; font-size: 1.1rem; color: var(--sage); display: block; margin-top: 2px; }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials {
+    padding: 100px 48px;
+    background: var(--cream);
+  }
+
+  .testi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 56px auto 0;
+  }
+
+  .testi-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid rgba(200,96,58,0.08);
+    position: relative;
+  }
+  .testi-card::before {
+    content: '"';
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--terracotta);
+    opacity: 0.15;
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    line-height: 1;
+  }
+  .testi-text { font-size: 0.9rem; color: var(--mid); line-height: 1.75; margin-bottom: 20px; font-style: italic; font-weight: 300; position: relative; z-index: 1; }
+  .testi-author { display: flex; align-items: center; gap: 10px; }
+  .testi-avatar { width: 40px; height: 40px; border-radius: 50%; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
+  .ta1 { background: #ffe8d6; } .ta2 { background: #d4ecd4; } .ta3 { background: #d4e4f4; }
+  .testi-name { font-weight: 700; font-size: 0.85rem; color: var(--deep); }
+  .testi-role { font-size: 0.72rem; color: var(--soft); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--deep);
+    color: white;
+    padding: 72px 48px 40px;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand .nav-logo { margin-bottom: 16px; color: white; }
+  .footer-brand .nav-logo .accent { color: var(--terracotta); }
+  .footer-brand p { font-size: 0.88rem; color: rgba(255,255,255,0.45); line-height: 1.7; font-weight: 300; max-width: 260px; }
+
+  .footer-col h4 { font-weight: 700; font-size: 0.85rem; margin-bottom: 16px; letter-spacing: 0.5px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul a { font-size: 0.83rem; color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s; }
+  .footer-col ul a:hover { color: var(--terracotta-light); }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .footer-socials { display: flex; gap: 16px; }
+  .fsoc {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .fsoc:hover { background: var(--terracotta); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    padding: 100px 48px;
+    text-align: center;
+    background: linear-gradient(135deg, #fff5ee 0%, #f0f7f0 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '🐾';
+    position: absolute;
+    font-size: 20rem;
+    opacity: 0.04;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .cta-section .section-title { margin-bottom: 16px; }
+  .cta-section .section-sub { margin: 0 auto 40px; }
+  .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 14px 24px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+    .hero-visual { display: none; }
+    .services-grid, .two-col, .revenue-grid, .testi-grid { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: 1fr 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .services, .social-page, .vet-page, .revenue, .testimonials, .cta-section { padding: 60px 24px; }
+    .revenue-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="paw-icon">🐾</span>
+    Paw<span>Verse</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#social">PawSocial</a></li>
+    <li><a href="#vet">VetConnect</a></li>
+    <li><a href="#revenue">For Business</a></li>
+    <li><a href="#cta" class="nav-cta">Join Free</a></li>
+  </ul>
+</nav>
+
+<!-- AD STRIP -->
+<div class="ad-strip" style="margin-top:64px;">
+  🐶 Royal Canin Premium Dog Food – 20% off this week only! <a>Shop Now →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-blob blob1"></div>
+  <div class="hero-bg-blob blob2"></div>
+  <div class="hero-bg-blob blob3"></div>
+
+  <div class="hero-text">
+    <div class="hero-eyebrow">🐾 The Ultimate Pet Universe</div>
+    <h1 class="hero-title">
+      Where Every<br/>
+      <span class="accent">Pet Finds</span><br/>
+      Their World
+    </h1>
+    <p class="hero-sub">
+      One platform. Two powerful services — a vibrant social community for pet lovers, and direct access to trusted vets, breeders & pet health essentials.
+    </p>
+    <div class="hero-btns">
+      <a href="#services" class="btn-primary">Explore Services →</a>
+      <a href="#cta" class="btn-outline">Join for Free</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-card-stack">
+      <!-- Back card -->
+      <div class="hcard hcard-back">
+        <div class="pet-avatar pa-bird">🦜</div>
+        <div class="pet-name">Mango Bird</div>
+        <div class="pet-handle">@mango.talks</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-n">1.2k</div><div class="stat-l">Followers</div></div>
+          <div class="stat"><div class="stat-n">48</div><div class="stat-l">Posts</div></div>
+        </div>
+      </div>
+
+      <!-- Side card -->
+      <div class="hcard hcard-side">
+        <div class="pet-avatar pa-cat">🐱</div>
+        <div class="pet-name">Dr. Mehta, DVM</div>
+        <div class="pet-handle">Feline Specialist</div>
+        <div class="pet-post-text" style="font-size:0.78rem;">⭐⭐⭐⭐⭐ Online consultation available</div>
+        <button class="btn-sc" style="padding:8px 16px;font-size:0.75rem;background:var(--sage);color:white;border:none;border-radius:50px;cursor:pointer;font-family:'DM Sans',sans-serif;">Book Now</button>
+      </div>
+
+      <!-- Main card -->
+      <div class="hcard hcard-main">
+        <div class="post-header" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div class="post-avatar pa-dog" style="width:38px;height:38px;border-radius:50%;font-size:1.3rem;display:flex;align-items:center;justify-content:center;background:rgba(212,149,42,0.15);">🐶</div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--deep);">Buddy the Labrador</div>
+            <div style="font-size:0.7rem;color:var(--soft);">@buddylab · 2m ago</div>
+          </div>
+        </div>
+        <div class="post-image pi1" style="width:100%;height:120px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:12px;background:linear-gradient(135deg,#ffe5c8,#ffd0a8);">🌳</div>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:12px;">Morning walk achieved! 🐾 Best day ever at the park with the gang.</p>
+        <div class="post-actions">
+          <div class="pa-btn">❤️ 284</div>
+          <div class="pa-btn">💬 42</div>
+          <div class="pa-btn">↗️ Share</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="services-header reveal">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Two Services,<br/>One Pawsome Platform</h2>
+    <p class="section-sub">PawVerse brings together a pet social community and professional pet health services — all under one roof, built to grow with you.</p>
+  </div>
+
+  <div class="services-grid">
+    <!-- PawSocial -->
+    <div class="service-card sc-social reveal">
+      <span class="sc-icon">📱</span>
+      <span class="sc-badge">Service 01</span>
+      <h3 class="sc-title">PawSocial — Your Pet's Instagram</h3>
+      <p class="sc-desc">A dedicated social media platform for pets and their humans. Share moments, grow followers, discover breeds, and build a community around your furry, feathered, or scaly companions.</p>
+      <ul class="sc-features">
+        <li>Pet profiles with bio, photos, reels & stories</li>
+        <li>Follow other pet owners & trending pet accounts</li>
+        <li>Community groups by breed, region & interest</li>
+        <li>Promoted product posts for pet brands</li>
+        <li>Hashtag discovery & trending challenges</li>
+        <li>Live videos & pet event announcements</li>
+      </ul>
+      <div class="sc-revenue">
+        <strong>💰 Revenue Streams:</strong> In-feed ad placements · Sponsored posts by pet brands · Promoted product listings · Brand partnership campaigns · Premium creator accounts
+      </div>
+      <a href="#social" class="btn-sc">Explore PawSocial →</a>
+    </div>
+
+    <!-- VetConnect -->
+    <div class="service-card sc-vet reveal">
+      <span class="sc-icon">🩺</span>
+      <span class="sc-badge">Service 02</span>
+      <h3 class="sc-title">VetConnect — Health & Expert Access</h3>
+      <p class="sc-desc">Connect with certified veterinarians and trusted breeders, shop curated pet medicines & supplements, and get professional guidance — all from the comfort of home.</p>
+      <ul class="sc-features">
+        <li>Video & chat consultations with verified vets</li>
+        <li>Browse certified breeders with reviews</li>
+        <li>Shop medicines, supplements & health products</li>
+        <li>Prescription management & delivery</li>
+        <li>Health records & vaccination reminders</li>
+        <li>Emergency vet locator & 24/7 support</li>
+      </ul>
+      <div class="sc-revenue">
+        <strong>💰 Revenue Streams:</strong> Commission on consultation fees (15–25%) · Commission on medicine & supplement sales · Featured listings for vets & breeders · Sponsored health brand ads · Premium clinic subscriptions
+      </div>
+      <a href="#vet" class="btn-sc">Explore VetConnect →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-inner">
+    <div class="stat-box reveal">
+      <div class="stat-box-num">2.4M+</div>
+      <div class="stat-box-label">Pets Registered</div>
+      <span class="stat-accent">and counting!</span>
+    </div>
+    <div class="stat-box reveal">
+      <div class="stat-box-num">18K+</div>
+      <div class="stat-box-label">Verified Vets</div>
+      <span class="stat-accent">across 40 cities</span>
+    </div>
+    <div class="stat-box reveal">
+      <div class="stat-box-num">95K+</div>
+      <div class="stat-box-label">Daily Posts</div>
+      <span class="stat-accent">happy pet moments</span>
+    </div>
+    <div class="stat-box reveal">
+      <div class="stat-box-num">₹12Cr+</div>
+      <div class="stat-box-label">Medicines Sold</div>
+      <span class="stat-accent">monthly GMV</span>
+    </div>
+  </div>
+</section>
+
+<!-- PAWSOCIAL MOCKUP -->
+<section class="social-page" id="social">
+  <div class="two-col">
+    <div class="reveal">
+      <div class="section-label">Service 01</div>
+      <h2 class="section-title">PawSocial<br/><em style="color:var(--terracotta);font-style:italic;">Feed & Explore</em></h2>
+      <p class="section-sub" style="margin-bottom:32px;">A living, breathing social network built entirely for pets. Every post, story, and reel is a paw print in your pet's digital legacy. Brands can promote products natively within the feed.</p>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(200,96,58,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">📸</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Pet Profiles & Stories</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">Each pet gets a unique bio, photo grid, and story feed. Owners manage multiple pets from one account.</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(212,149,42,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">📢</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Native Ad & Promoted Posts</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">Brands run in-feed ads and promoted product posts. Pet influencers earn through brand deals on platform.</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(107,143,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🌐</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Communities & Groups</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">Breed-specific groups, regional meetup boards, and adoption listings. Find your pet's tribe.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup-frame reveal">
+      <div class="mockup-topbar">
+        <div class="mtb-dot d1"></div><div class="mtb-dot d2"></div><div class="mtb-dot d3"></div>
+        <div class="mtb-url">pawverse.app/social</div>
+      </div>
+      <div class="mockup-body">
+        <div class="app-nav-bar">
+          <div class="app-logo-sm">🐾 PawSocial</div>
+          <div class="app-nav-icons">🔍 🔔 ✉️</div>
+        </div>
+
+        <!-- Stories -->
+        <div class="stories-bar">
+          <div class="story-item">
+            <div class="story-ring">🐶</div>
+            <div class="story-label">Buddy</div>
+          </div>
+          <div class="story-item">
+            <div class="story-ring">🐱</div>
+            <div class="story-label">Luna</div>
+          </div>
+          <div class="story-item">
+            <div class="story-ring">🐰</div>
+            <div class="story-label">Snowy</div>
+          </div>
+          <div class="story-item">
+            <div class="story-ring">🦜</div>
+            <div class="story-label">Mango</div>
+          </div>
+          <div class="story-item">
+            <div class="story-ring">🐠</div>
+            <div class="story-label">Nemo</div>
+          </div>
+        </div>
+
+        <div class="feed">
+          <!-- Post 1 -->
+          <div class="post-card">
+            <div class="post-header">
+              <div class="post-avatar" style="background:#ffe5c8;">🐶</div>
+              <div class="post-meta">
+                <div class="post-username">Buddy Labrador</div>
+                <div class="post-time">@buddylab · 2 min ago</div>
+              </div>
+              <div class="post-follow">+ Follow</div>
+            </div>
+            <div class="post-content">Morning walk complete! 🌳 The park was amazing today. Anyone else's dog obsessed with squirrels? 😂 #DogLife #GoldenHour</div>
+            <div class="post-image pi1">🌳</div>
+            <div class="post-footer">
+              <div class="pf-action">❤️ 284</div>
+              <div class="pf-action">💬 42</div>
+              <div class="pf-action">↗️ Share</div>
+              <div class="pf-action">🔖</div>
+            </div>
+          </div>
+
+          <!-- AD in feed -->
+          <div class="feed-ad">
+            <div class="feed-ad-label">Sponsored</div>
+            <div class="feed-ad-img">🦴</div>
+            <div class="feed-ad-text">
+              <strong>PetBites Organic Treats</strong>
+              100% natural, vet-approved snacks for your dog
+            </div>
+            <div class="feed-ad-cta">Shop Now</div>
+          </div>
+
+          <!-- Post 2 - Promoted -->
+          <div class="post-card">
+            <div class="post-header">
+              <div class="post-avatar" style="background:#d4ecd4;">🐱</div>
+              <div class="post-meta">
+                <div class="post-username">Luna's Cat World</div>
+                <div class="post-time">@lunacatworld · 15 min ago</div>
+              </div>
+              <div class="promoted-badge">Promoted</div>
+            </div>
+            <div class="post-content">Trying out the new CatComfort bed from @felinelife and Luna LOVES it 😍 Use my code LUNA20 for 20% off! #CatLife #Sponsored</div>
+            <div class="post-image pi2">🛏️</div>
+            <div class="post-footer">
+              <div class="pf-action">❤️ 1.2k</div>
+              <div class="pf-action">💬 88</div>
+              <div class="pf-action">↗️ Share</div>
+              <div class="pf-action">🔖</div>
+            </div>
+          </div>
+
+          <!-- Post 3 -->
+          <div class="post-card">
+            <div class="post-header">
+              <div class="post-avatar" style="background:#d4e4f4;">🐠</div>
+              <div class="post-meta">
+                <div class="post-username">Nemo's Aquarium</div>
+                <div class="post-time">@nemofish · 1 hr ago</div>
+              </div>
+              <div class="post-follow">+ Follow</div>
+            </div>
+            <div class="post-content">Just set up my new 200L planted tank! 🌿 Three months of planning and it's finally done. Drop a 🐟 if you want a full setup guide!</div>
+            <div class="post-image pi3">🌿</div>
+            <div class="post-footer">
+              <div class="pf-action">❤️ 567</div>
+              <div class="pf-action">💬 110</div>
+              <div class="pf-action">↗️ Share</div>
+              <div class="pf-action">🔖</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VET PAGE MOCKUP -->
+<section class="vet-page" id="vet">
+  <div class="two-col" style="direction:rtl;">
+    <div class="reveal" style="direction:ltr;">
+      <div class="section-label">Service 02</div>
+      <h2 class="section-title">VetConnect<br/><em style="color:var(--sage);font-style:italic;">Health & Care</em></h2>
+      <p class="section-sub" style="margin-bottom:32px;">Your pet's health hub. Find the right vet, consult online, order prescribed medicines, and track health records — all in one place. Every transaction earns PawVerse a commission.</p>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(107,143,107,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">👨‍⚕️</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Verified Veterinarians</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">All vets are license-verified. PawVerse earns 15–25% commission per consultation booked through the platform.</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(200,96,58,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">💊</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Medicine & Supplement Shop</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">Curated pet pharmacy with OTC and prescription products. 8–20% margin per sale, plus featured brand slots.</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(212,149,42,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🏆</div>
+          <div>
+            <strong style="font-size:0.9rem;color:var(--deep);">Certified Breeders Directory</strong>
+            <p style="font-size:0.83rem;color:var(--soft);line-height:1.6;margin-top:2px;">Browse government-certified breeders with photos, reviews, and verified lineage. PawVerse earns on premium listing upgrades.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup-frame vet-mockup reveal" style="direction:ltr;">
+      <div class="mockup-topbar">
+        <div class="mtb-dot d1"></div><div class="mtb-dot d2"></div><div class="mtb-dot d3"></div>
+        <div class="mtb-url">pawverse.app/vetconnect</div>
+      </div>
+      <div class="mockup-body">
+        <div class="app-nav-bar">
+          <div class="vet-app-logo">🩺 VetConnect</div>
+          <div class="app-nav-icons">🔍 📍 🔔</div>
+        </div>
+
+        <div class="vet-feed">
+          <!-- Search bar -->
+          <div style="background:rgba(107,143,107,0.08);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--soft);">
+            🔍 Search vets, medicines, breeders...
+          </div>
+
+          <!-- Doctors -->
+          <div class="med-section-title">🩺 Vets Available Now</div>
+
+          <div class="doctor-card">
+            <div class="doc-avatar da1">👨‍⚕️</div>
+            <div class="doc-info">
+              <div class="doc-name">Dr. Arjun Sharma</div>
+              <div class="doc-spec">Small Animal Specialist</div>
+              <div class="doc-rating"><span class="doc-stars">★★★★★</span> 4.9 · 340 reviews</div>
+              <div class="doc-fee">₹499 <span>per consult</span></div>
+              <div class="doc-commission">PawVerse earns 20% per booking</div>
+            </div>
+            <button class="doc-btn">Consult Now</button>
+          </div>
+
+          <div class="doctor-card">
+            <div class="doc-avatar da2">👩‍⚕️</div>
+            <div class="doc-info">
+              <div class="doc-name">Dr. Priya Menon</div>
+              <div class="doc-spec">Feline & Exotic Pets</div>
+              <div class="doc-rating"><span class="doc-stars">★★★★★</span> 4.8 · 210 reviews</div>
+              <div class="doc-fee">₹599 <span>per consult</span></div>
+              <div class="doc-commission">PawVerse earns 18% per booking</div>
+            </div>
+            <button class="doc-btn">Consult Now</button>
+          </div>
+
+          <!-- Vet Ad -->
+          <div class="vet-ad">
+            <div class="vet-ad-label">Sponsored</div>
+            <div style="font-size:1.5rem;">🏥</div>
+            <div style="font-size:0.78rem;color:var(--mid);">
+              <strong style="display:block;color:var(--deep);font-size:0.82rem;">PetCare Clinic – Bangalore</strong>
+              20% off first consultation this month!
+            </div>
+            <div style="margin-left:auto;background:var(--sage);color:white;padding:5px 12px;border-radius:20px;font-size:0.7rem;font-weight:600;cursor:pointer;white-space:nowrap;">Book</div>
+          </div>
+
+          <!-- Medicines -->
+          <div class="med-section-title">💊 Shop Medicines & Supplements</div>
+
+          <div class="med-grid">
+            <div class="med-card">
+              <div class="med-icon">🐛</div>
+              <div class="med-name">Deworming Tabs</div>
+              <div class="med-price">₹180</div>
+              <div class="med-commission-tag">12% margin</div>
+              <button class="med-add">+ Add to Cart</button>
+            </div>
+            <div class="med-card">
+              <div class="med-icon">🦴</div>
+              <div class="med-name">Joint Supplement</div>
+              <div class="med-price">₹650</div>
+              <div class="med-commission-tag">18% margin</div>
+              <button class="med-add">+ Add to Cart</button>
+            </div>
+            <div class="med-card">
+              <div class="med-icon">💉</div>
+              <div class="med-name">Tick & Flea Spot</div>
+              <div class="med-price">₹420</div>
+              <div class="med-commission-tag">15% margin</div>
+              <button class="med-add">+ Add to Cart</button>
+            </div>
+            <div class="med-card">
+              <div class="med-icon">🐟</div>
+              <div class="med-name">Omega-3 Chews</div>
+              <div class="med-price">₹390</div>
+              <div class="med-commission-tag">20% margin</div>
+              <button class="med-add">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVENUE MODEL -->
+<section class="revenue" id="revenue">
+  <div class="revenue-header reveal">
+    <div class="section-label">Business Model</div>
+    <h2 class="section-title" style="color:white;">How PawVerse<br/>Makes Money</h2>
+    <p class="section-sub">A multi-stream revenue model built for sustainable, compounding growth across both platforms.</p>
+  </div>
+
+  <div class="revenue-grid">
+    <div class="rev-card reveal">
+      <div class="rev-icon">📢</div>
+      <div class="rev-title">Display & Feed Ads</div>
+      <div class="rev-desc">In-feed native ads and banner placements on PawSocial and VetConnect. Pet brands, food companies, and clinics pay per impression and click. Both pages serve ads independently, doubling inventory.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">8–15L</span>
+        <span class="rev-period">/month potential</span>
+      </div>
+    </div>
+
+    <div class="rev-card reveal">
+      <div class="rev-icon">⭐</div>
+      <div class="rev-title">Promoted Posts & Listings</div>
+      <div class="rev-desc">Pet influencers and brands pay to boost posts in PawSocial. Vets and breeders pay for featured placement in VetConnect search results. Tiered pricing from ₹999–₹9999/week.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">5–12L</span>
+        <span class="rev-period">/month potential</span>
+      </div>
+    </div>
+
+    <div class="rev-card reveal">
+      <div class="rev-icon">💊</div>
+      <div class="rev-title">Commission on Consults & Meds</div>
+      <div class="rev-desc">15–25% commission on every vet consultation booked. 8–20% margin on medicines and supplements sold. Recurring revenue as pets need regular healthcare and refills.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">20–40L</span>
+        <span class="rev-period">/month at scale</span>
+      </div>
+    </div>
+
+    <div class="rev-card reveal">
+      <div class="rev-icon">🛍️</div>
+      <div class="rev-title">Brand Partnerships</div>
+      <div class="rev-desc">Exclusive brand deals where pet companies get a sponsored page, newsletter placement, and category ownership. Annual contracts from ₹2L–₹50L depending on category exclusivity.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">10–25L</span>
+        <span class="rev-period">/month potential</span>
+      </div>
+    </div>
+
+    <div class="rev-card reveal">
+      <div class="rev-icon">👑</div>
+      <div class="rev-title">Premium Subscriptions</div>
+      <div class="rev-desc">PawSocial Creator accounts unlock analytics, promo tools, and brand-matching. VetConnect clinics get priority listing, appointment management, and CRM tools. ₹499–₹2999/month.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">3–8L</span>
+        <span class="rev-period">/month potential</span>
+      </div>
+    </div>
+
+    <div class="rev-card reveal" style="background:rgba(200,96,58,0.12);border-color:rgba(200,96,58,0.25);">
+      <div class="rev-icon">🚀</div>
+      <div class="rev-title">Total Revenue Potential</div>
+      <div class="rev-desc">Combining all streams across both services, at moderate scale (500K MAU), PawVerse targets ₹50–100L/month GMV. The dual-platform model creates multiple compounding revenue loops.</div>
+      <div class="rev-estimate">
+        <span class="rev-$">₹</span>
+        <span class="rev-num">50–100L</span>
+        <span class="rev-period">/month at 500K users</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div style="text-align:center;margin-bottom:0;" class="reveal">
+    <div class="section-label">What They Say</div>
+    <h2 class="section-title">Loved by Pet Owners<br/>& Professionals</h2>
+  </div>
+
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <p class="testi-text">I posted a reel of my dog's zoomies and it went viral with 200K views. Brands started reaching out the same week! PawSocial is genuinely a game changer for pet creators.</p>
+      <div class="testi-author">
+        <div class="testi-avatar ta1">🐶</div>
+        <div>
+          <div class="testi-name">Sneha Reddy</div>
+          <div class="testi-role">Pet Creator, @snehaspups · Hyderabad</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi-card reveal">
+      <p class="testi-text">VetConnect tripled my online consultation bookings in two months. The platform handles payments, scheduling, and even sends me patient notes automatically. Outstanding.</p>
+      <div class="testi-author">
+        <div class="testi-avatar ta2">👨‍⚕️</div>
+        <div>
+          <div class="testi-name">Dr. Vikram Nair</div>
+          <div class="testi-role">Veterinarian · Bangalore</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi-card reveal">
+      <p class="testi-text">My cat had an emergency at 2AM and I got a vet on video call within 7 minutes. The prescribed medicine was delivered by morning. I can't imagine life without this app now.</p>
+      <div class="testi-author">
+        <div class="testi-avatar ta3">🐱</div>
+        <div>
+          <div class="testi-name">Ananya Bose</div>
+          <div class="testi-role">Cat Mom · Mumbai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="reveal">
+    <div class="section-label" style="justify-content:center;">Join PawVerse</div>
+    <h2 class="section-title">Your Pet Deserves<br/><em style="color:var(--terracotta);font-style:italic;">Their Own World</em></h2>
+    <p class="section-sub" style="margin:0 auto 40px;">Whether you're a pet parent, veterinarian, breeder, or pet brand — PawVerse has a place for you. Join free and discover a community that truly gets it.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-primary">🐾 Join PawSocial Free</a>
+      <a href="#" class="btn-outline">🩺 Register as a Vet / Breeder</a>
+      <a href="#" class="btn-outline" style="border-color:var(--amber);color:var(--amber);">📢 Advertise with Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- AD STRIP (bottom) -->
+<div class="ad-strip">
+  NutriPaws Supplements – Vet-recommended vitamins for dogs & cats. <a>Get 30% off your first order →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="nav-logo">🐾 Paw<span class="accent">Verse</span></div>
+      <p>India's first unified platform for pet social life and professional pet healthcare. Built with love for every paw, claw, fin, and feather.</p>
+    </div>
+    <div class="footer-col">
+      <h4>PawSocial</h4>
+      <ul>
+        <li><a href="#">Create Pet Profile</a></li>
+        <li><a href="#">Explore Feed</a></li>
+        <li><a href="#">Pet Communities</a></li>
+        <li><a href="#">Creator Program</a></li>
+        <li><a href="#">Advertise</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>VetConnect</h4>
+      <ul>
+        <li><a href="#">Find a Vet</a></li>
+        <li><a href="#">Medicine Shop</a></li>
+        <li><a href="#">Breeders Directory</a></li>
+        <li><a href="#">Health Records</a></li>
+        <li><a href="#">Emergency Help</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press Kit</a></li>
+        <li><a href="#">Partners</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div>© 2025 PawVerse Technologies Pvt. Ltd. · All rights reserved · Made with 🐾 in India</div>
+    <div class="footer-socials">
+      <div class="fsoc">📸</div>
+      <div class="fsoc">🐦</div>
+      <div class="fsoc">▶️</div>
+      <div class="fsoc">💼</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80 * (Array.from(reveals).indexOf(entry.target) % 4));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Nav scroll effect
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.boxShadow = window.scrollY > 40 ? '0 4px 24px rgba(44,31,20,0.1)' : 'none';
+  });
+
+  // Animate stat numbers
+  function animateCounter(el, target, prefix='', suffix='') {
+    let start = 0;
+    const duration = 2000;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const val = Math.floor(progress * target);
+      el.textContent = prefix + val.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  // Stat counters on view
+  const statNums = document.querySelectorAll('.stat-box-num');
+  const statData = ['2,400,000+', '18,000+', '95,000+', '₹12Cr+'];
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(statNums).indexOf(entry.target);
+        entry.target.textContent = statData[idx];
+        statObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  statNums.forEach(el => statObserver.observe(el));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+
+  // Like button interaction
+  document.querySelectorAll('.pf-action').forEach(btn => {
+    if (btn.textContent.includes('❤️')) {
+      btn.addEventListener('click', () => {
+        btn.style.color = 'var(--terracotta)';
+        btn.style.transform = 'scale(1.3)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 200);
+      });
+    }
+  });
+</script>
+</body>
+</html>
