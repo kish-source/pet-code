@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PawVerse – Your Pet's World</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #fdf6ee;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Background blobs */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(200,96,58,0.18) 0%, transparent 50%),
+      radial-gradient(circle at 10% 80%, rgba(107,143,107,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(212,149,42,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px 24px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #c8603a;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #2c1f14; }
+
+  .tagline {
+    font-size: 1rem;
+    color: #9a7b6a;
+    font-weight: 300;
+    margin-bottom: 60px;
+    letter-spacing: 0.3px;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .big-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 280px;
+    height: 220px;
+    border-radius: 28px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.25s, box-shadow 0.25s;
+    padding: 32px 24px;
+  }
+
+  .big-btn:hover {
+    transform: translateY(-6px);
+  }
+
+  .btn-social {
+    background: #c8603a;
+    box-shadow: 0 12px 40px rgba(200,96,58,0.3);
+    color: white;
+  }
+  .btn-social:hover {
+    background: #e07a52;
+    box-shadow: 0 20px 50px rgba(200,96,58,0.45);
+  }
+
+  .btn-care {
+    background: #2c1f14;
+    box-shadow: 0 12px 40px rgba(44,31,20,0.25);
+    color: white;
+  }
+  .btn-care:hover {
+    background: #3d2c1e;
+    box-shadow: 0 20px 50px rgba(44,31,20,0.38);
+  }
+
+  .btn-icon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .btn-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .btn-sub {
+    font-size: 0.82rem;
+    font-weight: 400;
+    opacity: 0.75;
+    letter-spacing: 0.2px;
+  }
+
+  @media (max-width: 620px) {
+    .big-btn {
+      width: 100%;
+      max-width: 340px;
+      height: 180px;
+    }
+    .logo { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">🐾 Paw<span>Verse</span></div>
+  <div class="tagline">Your pet's world, all in one place</div>
+
+  <div class="buttons">
+    <a href="#" class="big-btn btn-social">
+      <div class="btn-icon">🐾</div>
+      <div class="btn-label">Pet Social</div>
+      <div class="btn-sub">Connect · Share · Discover</div>
+    </a>
+
+    <a href="#" class="big-btn btn-care">
+      <div class="btn-icon">🩺</div>
+      <div class="btn-label">Pet Care Services</div>
+      <div class="btn-sub">Vets · Medicine · Health</div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
